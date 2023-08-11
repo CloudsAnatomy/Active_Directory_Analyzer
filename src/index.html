@@ -1,0 +1,718 @@
+﻿<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Active Directory Report</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Active Directory Report">
+        <meta name="author" content="Emmanuel Demillière & Thomas Prud'Homme & Brecht Hessel">
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+
+        <!-- Morris !! Tu pousses le bouchon un peu trop loin ... -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+		<style>
+            .container-fluid {margin-left: 20px ; margin-right: 25px}
+            #myTabContent {margin-top: 10px}
+			.panel-heading {text-align: center;font-weight:bold;font-size: 175%;}
+			h3 {padding-left: 15px;}
+            .container-fluid { margin: 0px; }
+			.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover { color: #fff; background-color: #00A4EF;}
+			.dashboard-signs {font-size: 50px;}
+			.timeline-item { margin-bottom: 25px; margin-left: 40px; position: relative; }
+			.timeline-item:before { background: #fff; border-radius: 2px; bottom: -30px; box-shadow: 0 0 3px rgba(0,0,0,0.2); content: ""; height: 100%; left: -30px; position: absolute; width: 3px; }
+			.timeline-item:after { background: #fff; border: 2px solid #ccc; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.1); content: ""; height: 15px; left: -36px; position: absolute; top: 10px; width: 15px; }
+			.timeline-item .timeline-inner { background: #fff; border: 1px solid #ddd; border-radius: 3px; padding: 10px; position: relative; }
+			.timeline-item .timeline-inner:before { border-right: 10px solid #ddd; border-style: solid; border-width: 10px; color: rgba(0,0,0,0); content: ""; display: block; height: 0; position: absolute; left: -20px; top: 6px; width: 0; }
+			.timeline-item .timeline-head { border-bottom: 1px solid #eee; margin-bottom: 8px; padding-bottom: 8px; }
+			.timeline-item .timeline-head h4 { margin-top: 4px; margin-bottom: 0; }
+			.canvasjs-chart-credit {visibility: hidden}
+		</style>
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+		<!-- Morris -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+        <!-- CanvasJS -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+        <script type="text/javascript">
+            CanvasJS.addColorSet("ColorSet", ['#F25022','#7FBA00','#00A4EF','#FFB900']);
+        
+			function displayOnly(name) {
+				$('#content').children().hide();
+				$(name).show();
+			};
+        </script>
+
+        <!-- jQuery -->
+        <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+
+        <!-- DataTables -->
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/colreorder/1.3.2/js/dataTables.colReorder.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/colreorder/1.3.2/css/colReorder.dataTables.min.css">
+		<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.2.0/js/dataTables.select.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.2.0/css/select.dataTables.min.css">
+		
+		<link rel='icon' type='image/png' href='data:image/png;base64,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'/>
+    </head>
+    <body OnLoad="displayOnly('#Dashboard')">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 onclick="displayOnly('#Dashboard')" style="cursor:pointer">Active Directory Report <small>For CAPSTONE</small></h1>
+                </div>
+                <div class="col-md-4">
+                    <p>08/11/2023 14:14:21 - ExecutionTime: 00:00:19.7659244 - Script Version: 1.0.4</p>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="row container-fluid">
+                    <ul class="nav nav-pills">                
+                        <li role="presentation" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Domain Informations<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ActiveDirectoryNames')">Active Directory Names</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#FlexibleSingleMasterOperationRoles')">Flexible Single Master Operation Roles</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ActiveDirectoryInformations')">Active Directory Informations</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ActiveDirectoryFFLDFLHistory')">Active Directory FFL DFL History</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ActiveDirectoryPasswordPolicy')">Active Directory Password Policy</a></li>
+                            </ul>
+                        </li>                
+                        <li role="presentation" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Statistics<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#UsersStatistics')">Users Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ComputersStatistics')">Computers Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#GroupsStatistics')">Groups Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#AdminsStatistics')">Admins Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#DomainControllersStatistics')">Domain Controllers Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#ComputersOSStatistics')">Computers OS Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#OrganizationalUnitsStatistics')">Organizational Units Statistics</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#RecycleBinStatistics')">RecycleBin Statistics</a></li>
+                            </ul>
+                        </li>                
+                        <li role="presentation" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Administrators<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#Admins')">Admins</a></li>
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#Groups')">Groups</a></li>
+                            </ul>
+                        </li>                
+                        <li role="presentation" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">OU<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-toggle="tab" OnClick="displayOnly('#OrganizationalUnits')">Organizational Units</a></li>
+                            </ul>
+                        </li>        
+                    </ul>
+                    
+                    </ul>
+                </div>
+                <div class="row container-fluid" id="content">
+				    <div id="Dashboard">
+                        <script type="text/javascript">
+                            function toggleText(button_id)  {
+                                var text = document.getElementById(button_id).firstChild;
+                                text.data = text.data == "Hide" ? "Show" : "Hide";
+                            }
+                        </script>
+                        <div class="page-header">
+                            <h2>Dashboard</h2>
+                        </div>                            
+                        <div class="row">
+                            <div class="col-md-11">    
+                                <h3>Overview Of Users, Computers, Groups & Admins</h3>
+                            </div>
+                            <div class="col-md-1">
+                                <button id="OverviewOfUsersComputersGroups&AdminsButton" onclick="toggleText(this.id)" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOverviewOfUsersComputersGroups&Admins" aria-expanded="false" aria-controls="collapseOverviewOfUsersComputersGroups&Admins">Hide</button>
+                            </div>
+                        </div>
+                        <div class="row-fluid collapse in" id="collapseOverviewOfUsersComputersGroups&Admins">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Users: 273</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="UsersCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("UsersCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "UsersCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"Disabled : 1", indexLabel:"Disabled" },    
+                                                                {  y: 273, legendText:"NeverChangedPwd : 273", indexLabel:"NeverChangedPwd" },    
+                                                                {  y: 273, legendText:"PwdDontExpire : 273", indexLabel:"PwdDontExpire" },    
+                                                                {  y: 1, legendText:"PwdNotRequired : 1", indexLabel:"PwdNotRequired" },    
+                                                                {  y: 1, legendText:"PwdOlderThanOneYear : 1", indexLabel:"PwdOlderThanOneYear" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#UsersStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Groups: 66</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="GroupsCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("GroupsCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "GroupsCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 13, legendText:"AdminGroups : 13", indexLabel:"AdminGroups" },    
+                                                                {  y: 37, legendText:"EmptyGroups : 37", indexLabel:"EmptyGroups" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#GroupsStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Computers: 2</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="ComputersCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("ComputersCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "ComputersCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"TrustedForDelegation : 1", indexLabel:"TrustedForDelegation" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#ComputersStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Admins: 4</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="AdminCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("AdminCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "AdminCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"Disabled : 1", indexLabel:"Disabled" },    
+                                                                {  y: 3, legendText:"NeverChangedPwd : 3", indexLabel:"NeverChangedPwd" },    
+                                                                {  y: 2, legendText:"PwdDontExpire : 2", indexLabel:"PwdDontExpire" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#AdminsStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">UserPrincipalName: 2</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="UPNCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("UPNCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "UPNCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 4, legendText:"Empty : 4", indexLabel:"Empty" },    
+                                                                {  y: 273, legendText:"CAPSTONE.COM : 273", indexLabel:"CAPSTONE.COM" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#UserPrincipalNameStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Mail Domain: 272</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="UsersMailDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("UsersMailDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "UsersMailDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 272, legendText:"capstone.com : 272", indexLabel:"capstone.com" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                        <a class='btn btn-primary btn-xs' href="#" OnClick="displayOnly('#MaildomainsStatistics')">Details</a>
+                                    </div>
+                                </div>
+                            </div>                                
+                                </div>
+                            </div>
+                        </div>                            
+                        <div class="row">
+                            <div class="col-md-11">    
+                                <h3>Deleted Objects</h3>
+                            </div>
+                            <div class="col-md-1">
+                                <button id="DeletedObjectsButton" onclick="toggleText(this.id)" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseDeletedObjects" aria-expanded="false" aria-controls="collapseDeletedObjects">Hide</button>
+                            </div>
+                        </div>
+                        <div class="row-fluid collapse in" id="collapseDeletedObjects">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">RecycleBin: 286</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="RecycleBinCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("RecycleBinCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "RecycleBinCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 0, legendText:"Computers : 0", indexLabel:"Computers" },    
+                                                                {  y: 0, legendText:"Groups : 0", indexLabel:"Groups" },    
+                                                                {  y: 0, legendText:"OUs : 0", indexLabel:"OUs" },    
+                                                                {  y: 286, legendText:"Users : 286", indexLabel:"Users" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>                                
+                                </div>
+                            </div>
+                        </div>                            
+                        <div class="row">
+                            <div class="col-md-11">    
+                                <h3>Overview Of Domain Controllers</h3>
+                            </div>
+                            <div class="col-md-1">
+                                <button id="OverviewOfDomainControllersButton" onclick="toggleText(this.id)" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOverviewOfDomainControllers" aria-expanded="false" aria-controls="collapseOverviewOfDomainControllers">Hide</button>
+                            </div>
+                        </div>
+                        <div class="row-fluid collapse in" id="collapseOverviewOfDomainControllers">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Domain Controllers: 1</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="DCCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("DCCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "DCCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 0, legendText:"RODC : 0", indexLabel:"RODC" },    
+                                                                {  y: 1, legendText:"RWDC : 1", indexLabel:"RWDC" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Domain Controllers: 1</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="DCStateCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("DCStateCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "DCStateCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 0, legendText:"Offline : 0", indexLabel:"Offline" },    
+                                                                {  y: 1, legendText:"Online : 1", indexLabel:"Online" },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>                                
+                                </div>
+                            </div>
+                        </div>                            
+                        <div class="row">
+                            <div class="col-md-11">    
+                                <h3>Overview Of Operating Systems In This Domain</h3>
+                            </div>
+                            <div class="col-md-1">
+                                <button id="OverviewOfOperatingSystemsInThisDomainButton" onclick="toggleText(this.id)" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseOverviewOfOperatingSystemsInThisDomain" aria-expanded="false" aria-controls="collapseOverviewOfOperatingSystemsInThisDomain">Hide</button>
+                            </div>
+                        </div>
+                        <div class="row-fluid collapse in" id="collapseOverviewOfOperatingSystemsInThisDomain">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Operating System: 2</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="ADOSCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("ADOSCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "ADOSCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"Windows Server 2022 Datacenter  : 1", indexLabel:"Windows Server 2022 Datacenter " },    
+                                                                {  y: 1, legendText:"Windows 10 Pro  : 1", indexLabel:"Windows 10 Pro " },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Servers OS: 1 on 1 servers</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="ADOSServerCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("ADOSServerCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "ADOSServerCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"Windows Server 2022 Datacenter  : 1", indexLabel:"Windows Server 2022 Datacenter " },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Client OS: 1 on 1 clients</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="ADOSClientCanvasDoughnut" style="height: 342px"></div>
+                                                <script type="text/javascript">
+                                                    var chart = new CanvasJS.Chart("ADOSClientCanvasDoughnut", {
+                                                        colorSet: "ColorSet",
+                                                        exportEnabled: true,
+                                                        exportFileName: "ADOSClientCanvasDoughnut",
+                                                        data: [{
+                                                            type: "doughnut",
+                                                            showInLegend: true,
+                                                            dataPoints: [
+                                                                
+                                                                {  y: 1, legendText:"Windows 10 Pro  : 1", indexLabel:"Windows 10 Pro " },   
+                                                            ]
+                                                        }]
+                                                    });
+                                                    chart.render();
+                                                </script>
+                                        
+                                    </div>
+                                </div>
+                            </div>                                
+                                </div>
+                            </div>
+                        </div>
+			            							<div class="row">
+								<div class="col-md-6">
+									<h2>Active Directory in a Timeline</h2>
+									<div class="qa-message-list">
+										
+									</div>
+								</div>
+							</div>
+                    </div>                        
+                    <div id="ActiveDirectoryNames">
+                        <h3>Active Directory Names</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Differents Name Of The Active Directory Domain.
+                        </div>
+                        <table class='table table-bordered' id='Table_ActiveDirectoryNames'> <tr><td>configurationNamingContext:</td><td>CN=Configuration,DC=CAPSTONE,DC=COM</td></tr> <tr><td>SID:</td><td>S-1-5-21-202921153-554839690-1000880707</td></tr> <tr><td>RootSID:</td><td>S-1-5-21-202921153-554839690-1000880707</td></tr> <tr><td>ForestName:</td><td>CAPSTONE.COM</td></tr> <tr><td>DN:</td><td>DC=CAPSTONE,DC=COM</td></tr> <tr><td>NetBios:</td><td>CAPSTONE</td></tr> <tr><td>DomainName:</td><td>CAPSTONE</td></tr> <tr><td>schemaNamingContext:</td><td>CN=Schema,CN=Configuration,DC=CAPSTONE,DC=COM</td></tr> <tr><td>FQDN:</td><td>CAPSTONE.COM</td></tr> <tr><td>rootDomainNamingContext:</td><td>DC=CAPSTONE,DC=COM</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="FlexibleSingleMasterOperationRoles">
+                        <h3>Flexible Single Master Operation Roles</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            List Of FSMO Owners.
+                        </div>
+                        <table class='table table-bordered' id='Table_FlexibleSingleMasterOperationRoles'> <tr><td>PdcRoleOwner:</td><td>AZ1PRDDC-1.CAPSTONE.COM</td></tr> <tr><td>InfrastructureRoleOwner:</td><td>AZ1PRDDC-1.CAPSTONE.COM</td></tr> <tr><td>RidRoleOwner:</td><td>AZ1PRDDC-1.CAPSTONE.COM</td></tr> <tr><td>Schema Master:</td><td>AZ1PRDDC-1.CAPSTONE.COM</td></tr> <tr><td>Naming Master:</td><td>AZ1PRDDC-1.CAPSTONE.COM</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="ActiveDirectoryInformations">
+                        <h3>Active Directory Informations</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Various Information About The Active Directory Domain.
+                        </div>
+                        <table class='table table-bordered' id='Table_ActiveDirectoryInformations'> <tr><td>Domain Functional Level:</td><td>Unknown</td></tr> <tr><td>Forest Functional Level:</td><td>Unknown</td></tr> <tr><td>DeletedObjectLifeTime:</td><td></td></tr> <tr><td>TombStoneLifeTime:</td><td>180</td></tr> <tr><td>Schema:</td><td>Windows Server 2019</td></tr> <tr><td>Exchange Schema:</td><td>Uninstalled.</td></tr> <tr><td>Lync Schema:</td><td>Uninstalled.</td></tr> <tr><td>IsRodcPrepared:</td><td>08/05/2023 21:45:38</td></tr> <tr><td>RIDs Issued:</td><td>8601</td></tr> <tr><td>RIDs left:</td><td>1073733222</td></tr> <tr><td>CentralStoreEnabled:</td><td>False</td></tr> <tr><td>AdmxFileVersion:</td><td>NoCentralStore</td></tr> <tr><td>SysvolReplication:</td><td>DFSR</td></tr> <tr><td>RecycleBin:</td><td>08/06/2023 22:20:22</td></tr> <tr><td>IpOptions:</td><td></td></tr> <tr><td>PrivilegedAccessManagement:</td><td>False</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="ActiveDirectoryFFLDFLHistory">
+                        <h3>Active Directory FFL DFL History</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Forest Fonctionnal and Domain Functionnal level information.
+                        </div>
+                        <table class='table table-bordered' id='Table_ActiveDirectoryFFLDFLHistory'> <tr><td>DomainName:</td><td>CAPSTONE.COM</td></tr> <tr><td>LastDFLUpdate:</td><td>8/5/2023 5:48:33 PM</td></tr> <tr><td>DFLVersion:</td><td>1</td></tr> <tr><td>LastFFLUpdate:</td><td>8/5/2023 5:45:30 PM</td></tr> <tr><td>FFLVersion:</td><td>1</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="ActiveDirectoryPasswordPolicy">
+                        <h3>Active Directory Password Policy</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Active Directory Password Policy.
+                        </div>
+                        <table class='table table-bordered' id='Table_ActiveDirectoryPasswordPolicy'> <tr><td>maxPwdAge:</td><td>42.00:00:00</td></tr> <tr><td>lockOutObservationWindow:</td><td>00:00:00</td></tr> <tr><td>pwdHistoryLength:</td><td>24</td></tr> <tr><td>lockoutThreshold:</td><td>0</td></tr> <tr><td>Complexity:</td><td>True</td></tr> <tr><td>lockoutDuration:</td><td>00:10:00</td></tr> <tr><td>DomainName:</td><td>CAPSTONE</td></tr> <tr><td>minPwdAge:</td><td>1.00:00:00</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="UsersStatistics">
+                        <h3>Users Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The User Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_UsersStatistics'> <tr><td>Users:</td><td>273</td></tr> <tr><td>Disabled:</td><td>1</td></tr> <tr><td>PwdDontExpire:</td><td>273</td></tr> <tr><td>PwdNotRequired:</td><td>1</td></tr> <tr><td>NeverChangedPwd:</td><td>273</td></tr> <tr><td>PwdOlderThanOneYear:</td><td>1</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="ComputersStatistics">
+                        <h3>Computers Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Computer Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_ComputersStatistics'> <tr><td>Computers:</td><td>2</td></tr> <tr><td>TrustedForDelegation:</td><td>1</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="GroupsStatistics">
+                        <h3>Groups Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Group Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_GroupsStatistics'> <tr><td>Groups:</td><td>66</td></tr> <tr><td>AdminGroups:</td><td>13</td></tr> <tr><td>EmptyGroups:</td><td>37</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="AdminsStatistics">
+                        <h3>Admins Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Admin Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_AdminsStatistics'> <tr><td>Admins:</td><td>4</td></tr> <tr><td>Disabled:</td><td>1</td></tr> <tr><td>PwdDontExpire:</td><td>2</td></tr> <tr><td>NeverChangedPwd:</td><td>3</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="DomainControllersStatistics">
+                        <h3>Domain Controllers Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Domain Controller Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_DomainControllersStatistics'> <tr><td>RODC:</td><td>0</td></tr> <tr><td>RWDC:</td><td>1</td></tr> <tr><td>DomainControllers:</td><td>1</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="ComputersOSStatistics">
+                        <h3>Computers OS Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Computer OS Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_ComputersOSStatistics'> <colgroup><col/><col/></colgroup> <thead><tr><th>Name</th><th>Count</th></tr></thead><tbody> <tr><td>Windows Server 2022 Datacenter </td><td>1</td></tr> <tr><td>Windows 10 Pro </td><td>1</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="OrganizationalUnitsStatistics">
+                        <h3>Organizational Units Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The Dirty OU Stackbar.
+                        </div>
+                        <table class='table table-bordered' id='Table_OrganizationalUnitsStatistics'> <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup> <thead><tr><th>ProtectedFromAccidentalDeletion</th><th>GroupPolicies</th><th>Users</th><th>IsCompliant</th><th>IgnoredGroupPolicies</th><th>Name</th><th>GroupPoliciesInheritenceBlocked</th><th>GroupPercent</th><th>Computers</th><th>Total</th><th>UserPercent</th><th>Groups</th><th>ComputerPercent</th><th>EnforcedGroupPolicies</th></tr></thead><tbody> <tr><td>False</td><td>1</td><td>0</td><td>True</td><td>0</td><td>OU=Domain Controllers,DC=CAPSTONE,DC=COM</td><td>False</td><td>0.00</td><td>1</td><td>1</td><td>0.00</td><td>0</td><td>100.00</td><td>0</td></tr> <tr><td>True</td><td>0</td><td>1</td><td>False</td><td>0</td><td>OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>False</td><td>50.00</td><td>0</td><td>2</td><td>50.00</td><td>1</td><td>0.00</td><td>0</td></tr> <tr><td>True</td><td>0</td><td>272</td><td>True</td><td>0</td><td>OU=Users,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>False</td><td>0.00</td><td>0</td><td>272</td><td>100.00</td><td>0</td><td>0.00</td><td>0</td></tr> <tr><td>True</td><td>0</td><td>0</td><td>True</td><td>0</td><td>OU=Groups,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>False</td><td>100.00</td><td>0</td><td>17</td><td>0.00</td><td>17</td><td>0.00</td><td>0</td></tr> <tr><td>True</td><td>0</td><td>0</td><td>True</td><td>0</td><td>OU=Computers,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>False</td><td>0.00</td><td>1</td><td>1</td><td>0.00</td><td>0</td><td>100.00</td><td>0</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="RecycleBinStatistics">
+                        <h3>RecycleBin Statistics</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Statistics Used For The RecybleBin Donut.
+                        </div>
+                        <table class='table table-bordered' id='Table_RecycleBinStatistics'> <tr><td>OUs:</td><td>0</td></tr> <tr><td>Groups:</td><td>0</td></tr> <tr><td>Users:</td><td>286</td></tr> <tr><td>Computers:</td><td>0</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="Admins">
+                        <h3>Admins</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Accounts With AdminCount Set To 1. Those Accounts May Be Impacted By AdminSDHolder & Inheritence Is Broken.
+                        </div>
+                        <table class='table table-bordered' id='Table_Admins'> <colgroup><col/><col/><col/><col/><col/><col/></colgroup> <thead><tr><th>SamAccountName</th><th>Disabled</th><th>LastLogonTimeStamp</th><th>PwdLastSet</th><th>BadPasswordTime</th><th>CreationDate</th></tr></thead><tbody> <tr><td>VADMIN</td><td>False</td><td>8/5/2023 5:48:25 PM</td><td>7/30/2023 7:46:18 PM</td><td>8/6/2023 10:11:13 AM</td><td>8/5/2023 9:45:39 PM</td></tr> <tr><td>AZ1PRDDC-1</td><td>False</td><td>12/31/1600 7:00:00 PM</td><td>8/4/2023 2:17:11 AM</td><td>8/5/2023 5:53:02 PM</td><td>8/5/2023 9:45:39 PM</td></tr> <tr><td>krbtgt</td><td>True</td><td>12/31/1600 7:00:00 PM</td><td>8/5/2023 9:47:20 PM</td><td>12/31/1600 7:00:00 PM</td><td>8/5/2023 9:47:20 PM</td></tr> <tr><td>hvirk</td><td>False</td><td>8/6/2023 2:12:43 PM</td><td>8/6/2023 6:05:04 PM</td><td>8/8/2023 4:04:54 PM</td><td>8/6/2023 3:12:00 PM</td></tr> </tbody></table>
+                    </div>                        
+                    <div id="Groups">
+                        <h3>Groups</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Groups With AdminCount Set To 1.
+                        </div>
+                        <table class='table table-bordered' id='Table_Groups'> <colgroup><col/><col/><col/><col/></colgroup> <thead><tr><th>Name</th><th>Member</th><th>Members</th><th>MemberOf</th></tr></thead><tbody> <tr><td>Administrators</td><td>5</td><td>Harman Virk,Domain Admins,Enterprise Admins,AZ1PRDDC-1,VADMIN</td><td></td></tr> <tr><td>Print Operators</td><td>1</td><td></td><td></td></tr> <tr><td>Backup Operators</td><td>1</td><td></td><td></td></tr> <tr><td>Replicator</td><td>1</td><td></td><td></td></tr> <tr><td>Domain Controllers</td><td>1</td><td></td><td>Denied RODC Password Replication Group</td></tr> <tr><td>Schema Admins</td><td>1</td><td>VADMIN</td><td>Denied RODC Password Replication Group</td></tr> <tr><td>Enterprise Admins</td><td>1</td><td>VADMIN</td><td>Denied RODC Password Replication Group,Administrators</td></tr> <tr><td>Domain Admins</td><td>2</td><td>Harman Virk,VADMIN</td><td>Denied RODC Password Replication Group,Administrators</td></tr> <tr><td>Server Operators</td><td>1</td><td></td><td></td></tr> <tr><td>Account Operators</td><td>1</td><td></td><td></td></tr> <tr><td>Read-only Domain Controllers</td><td>1</td><td></td><td>Denied RODC Password Replication Group</td></tr> <tr><td>Key Admins</td><td>1</td><td></td><td></td></tr> <tr><td>Enterprise Key Admins</td><td>1</td><td></td><td></td></tr> </tbody></table>
+                    </div>                        
+                    <div id="OrganizationalUnits">
+                        <h3>Organizational Units</h3>
+                        
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            Organizational Units in the domain.
+                        </div>
+                        <table class='table table-bordered' id='Table_OrganizationalUnits'> <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup> <thead><tr><th>Name</th><th>ProtectedFromAccidentalDeletion</th><th>Users</th><th>Computers</th><th>Groups</th><th>GroupPolicies</th><th>IgnoredGroupPolicies</th><th>EnforcedGroupPolicies</th><th>GroupPoliciesInheritenceBlocked</th></tr></thead><tbody> <tr><td>OU=Domain Controllers,DC=CAPSTONE,DC=COM</td><td>False</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>False</td></tr> <tr><td>OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>True</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>False</td></tr> <tr><td>OU=Users,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>True</td><td>272</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>False</td></tr> <tr><td>OU=Groups,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>True</td><td>0</td><td>0</td><td>17</td><td>0</td><td>0</td><td>0</td><td>False</td></tr> <tr><td>OU=Computers,OU=Enterprise,DC=CAPSTONE,DC=COM</td><td>True</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>False</td></tr> </tbody></table>
+                    </div>                    
+                </div>
+
+                <script>
+                    $(document).ready(function(){
+                        $('#Table_ComputersOSStatistics').DataTable( { paging: false, colReorder: true, select: true } );
+                        $('#Table_OrganizationalUnitsStatistics').DataTable( { paging: false, colReorder: true, select: true } );
+                        $('#Table_Admins').DataTable( { paging: false, colReorder: true, select: true } );
+                        $('#Table_Groups').DataTable( { paging: false, colReorder: true, select: true } );
+                        $('#Table_OrganizationalUnits').DataTable( { paging: false, colReorder: true, select: true } );
+                    });
+                </script>
+            </div>
+            <hr>
+            <div class="row container-fluid">
+                <p>Generated By PowerShell 5.1.19041.3031 On AZ1WKSTN-1 By HVIRK</p>
+            </div>
+        </div>
+    </body>
+</html>
